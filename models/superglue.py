@@ -156,9 +156,9 @@ def log_optimal_transport(scores, alpha, iters: int):
     one = scores.new_tensor(1)
     ms, ns = (m * one).to(scores), (n * one).to(scores)
 
-    bins0 = alpha.expand(b, m, 1)
-    bins1 = alpha.expand(b, 1, n)
-    alpha = alpha.expand(b, 1, 1)
+    bins0 = alpha.expand(b, m, 1)  # column dustbin
+    bins1 = alpha.expand(b, 1, n)  # row dustbin
+    alpha = alpha.expand(b, 1, 1)  # intersection dustbin
 
     couplings = torch.cat(
         [torch.cat([scores, bins0], -1), torch.cat([bins1, alpha], -1)], 1
@@ -225,6 +225,7 @@ class SuperGlue(nn.Module):
             bias=True,
         )
 
+        # Add dustbins to be one of the learnable parameters.
         bin_score = torch.nn.Parameter(torch.tensor(1.0))
         self.register_parameter("bin_score", bin_score)
 
